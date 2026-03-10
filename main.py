@@ -36,7 +36,9 @@ def get_item(item_id: int):
 
 @app.get("/", response_class=HTMLResponse)
 def read_root():
-    return "<h1>Hello suman thapa</h1>"
+    from datetime import datetime
+    current_time = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')
+    return f"<h1>Current time: {current_time}</h1>"
 
 
 if __name__ == "__main__":
