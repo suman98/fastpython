@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video with Image Overlay</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        
+        .input-wrapper {
+            position: relative;
+        }
+        
+        input[type="file"],
+        input[type="text"],
+        input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+        
+        input[type="file"]:hover,
+        input[type="text"]:hover,
+        input[type="number"]:hover {
+            border-color: #667eea;
+        }
+        
+        input[type="file"]:focus,
+        input[type="text"]:focus,
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .file-input-label {
+            display: block;
+            padding: 12px;
+            background: #f5f5f5;
+            border: 2px dashed #667eea;
+            border-radius: 6px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .file-input-label:hover {
+            background: #f0f0f0;
+            border-color: #764ba2;
+        }
+        
+        input[type="file"] {
+            display: none;
+        }
+        
+        .file-name {
+            display: block;
+            margin-top: 8px;
+            color: #667eea;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        
+        .time-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 30px;
+        }
+        
+        button {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+        
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+        
+        .btn-small {
+            padding: 8px 14px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-small:hover {
+            background: #764ba2;
+        }
+        
+        .btn-remove {
+            padding: 8px 12px;
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-remove:hover {
+            background: #ff5252;
+        }
+        
+        .alert {
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: none;
+        }
+        
+        .alert-error {
+            background: #fee;
+            color: #c33;
+            border: 1px solid #fcc;
+        }
+        
+        .alert-success {
+            background: #efe;
+            color: #3c3;
+            border: 1px solid #cfc;
+        }
+        
+        .alert-info {
+            background: #eef;
+            color: #33c;
+            border: 1px solid #ccf;
+        }
+        
+        .alert.show {
+            display: block;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .loading.show {
+            display: block;
+        }
+        
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .time-format-hint {
+            font-size: 12px;
+            color: #999;
+            margin-top: 4px;
+        }
+
+        /* Time selector */
+        .audio-duration {
+            margin-top: 8px;
+            font-size: 12px;
+            color: #667eea;
+            font-weight: 600;
+            display: none;
+        }
+
+        .audio-duration.show {
+            display: block;
+        }
+
+        .time-selector {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .time-field {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .time-label-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .time-display {
+            font-variant-numeric: tabular-nums;
+            background: #f0eefe;
+            color: #667eea;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 4px;
+            min-width: 52px;
+            text-align: center;
+        }
+
+        input[type="range"].time-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 6px;
+            border-radius: 4px;
+            background: #e0e0e0;
+            outline: none;
+            padding: 0;
+            margin: 6px 0;
+            cursor: pointer;
+        }
+
+        input[type="range"].time-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: 2px solid #fff;
+            box-shadow: 0 1px 4px rgba(102, 126, 234, 0.5);
+            cursor: pointer;
+            transition: transform 0.15s ease;
+        }
+
+        input[type="range"].time-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+        }
+
+        input[type="range"].time-slider::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: 2px solid #fff;
+            box-shadow: 0 1px 4px rgba(102, 126, 234, 0.5);
+            cursor: pointer;
+        }
+
+        .start-end-track {
+            margin-top: 2px;
+            font-size: 11px;
+            color: #999;
+            text-align: center;
+        }
+
+        /* Result / download */
+        .result {
+            display: none;
+            margin-top: 24px;
+            padding: 20px;
+            border: 2px solid #cfc;
+            background: #f3fbf3;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .result.show {
+            display: block;
+        }
+
+        .result-title {
+            color: #2e8b2e;
+            font-weight: 600;
+            margin-bottom: 16px;
+            font-size: 15px;
+        }
+
+        .result-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-download {
+            flex: 1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 14px;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            background: linear-gradient(135deg, #2e8b2e 0%, #1f7a1f 100%);
+            color: #fff;
+            transition: all 0.3s ease;
+        }
+
+        .btn-download:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(46, 139, 46, 0.3);
+        }
+
+        /* Image preview + paste */
+        .file-input-label.active {
+            border-color: #764ba2;
+            background: #f5f0ff;
+            box-shadow: 0 0 0 3px rgba(118, 75, 162, 0.15);
+        }
+
+        .file-input-label.dragging {
+            border-color: #764ba2;
+            background: #f0e6ff;
+        }
+
+        .image-preview {
+            display: none;
+            max-width: 100%;
+            max-height: 90px;
+            margin: 0 auto 6px;
+            border-radius: 4px;
+            object-fit: contain;
+        }
+
+        .paste-hint {
+            display: block;
+            font-size: 11px;
+            color: #999;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎬 Video Overlay</h1>
+        <p class="subtitle">Overlay an image on your video for a specified time interval</p>
+        
+        <div id="alert" class="alert"></div>
+        
+        <form id="uploadForm">
+            <div class="form-group">
+                <label for="audioFile">Audio File *</label>
+                <div class="input-wrapper">
+                    <label for="audioFile" class="file-input-label">
+                        📁 Click to upload or drag and drop
+                    </label>
+                    <input type="file" id="audioFile" name="audioFile" accept="audio/*" required>
+                    <span class="file-name" id="audioFileName"></span>
+                    <span class="audio-duration" id="audioDuration"></span>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <label>Image(s) & Time Range(s) *</label>
+                    <button type="button" class="btn-small" onclick="addImageRow()">+ Add Image</button>
+                </div>
+                <div id="imageRows" style="display: flex; flex-direction: column; gap: 15px;">
+                    <div class="image-row" data-row-id="0">
+                        <div style="display: grid; grid-template-columns: 2fr 3fr 40px; gap: 12px; align-items: start;">
+                            <div>
+                                <label style="font-size: 12px; margin-bottom: 4px;">Image File</label>
+                                <div class="file-input-label" style="padding: 8px; cursor: pointer; text-align: center;">
+                                    <input type="file" class="image-file" accept="image/*" required style="display: none;">
+                                    <img class="image-preview" alt="preview">
+                                    <span class="image-file-name">📁 Choose image</span>
+                                    <span class="paste-hint">or paste ⌘V / Ctrl+V</span>
+                                </div>
+                            </div>
+                            <div class="time-selector">
+                                <div class="time-field">
+                                    <div class="time-label-row">
+                                        <span>Start</span>
+                                        <span class="time-display start-display">0:00</span>
+                                    </div>
+                                    <input type="range" class="start-time time-slider" min="0" max="300" value="0" step="1">
+                                </div>
+                                <div class="time-field">
+                                    <div class="time-label-row">
+                                        <span>End</span>
+                                        <span class="time-display end-display">0:30</span>
+                                    </div>
+                                    <input type="range" class="end-time time-slider" min="0" max="300" value="30" step="1">
+                                </div>
+                                <div class="start-end-track">Upload audio to set the time range</div>
+                            </div>
+                            <button type="button" class="btn-remove" onclick="removeImageRow(this)" style="display: none;">✕</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="button-group">
+                <button type="button" class="btn-secondary" onclick="resetForm()">Reset</button>
+                <button type="submit" class="btn-primary" id="submitBtn">Generate Video</button>
+            </div>
+            
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Processing your video... This may take a few minutes.</p>
+            </div>
+
+            <div class="result" id="result">
+                <div class="result-title">✓ Video ready!</div>
+                <div class="result-actions">
+                    <a id="downloadLink" class="btn-download" href="#" download>⬇ Download Video</a>
+                    <button type="button" class="btn-secondary" onclick="resetForm()">Create Another</button>
+                </div>
+            </div>
+        </form>
+    </div>
+    
+    <script>
+        let imageRowCount = 0;
+        let audioDuration = 0; // seconds; 0 until an audio file is loaded
+
+        // Format seconds -> M:SS
+        function formatTime(sec) {
+            sec = Math.max(0, Math.round(sec));
+            const m = Math.floor(sec / 60);
+            const s = sec % 60;
+            return `${m}:${s.toString().padStart(2, '0')}`;
+        }
+
+        // Wire the start/end sliders of a row: keep start <= end and update labels
+        function setupRowTime(row) {
+            const startSlider = row.querySelector('.start-time');
+            const endSlider = row.querySelector('.end-time');
+            const startDisplay = row.querySelector('.start-display');
+            const endDisplay = row.querySelector('.end-display');
+
+            function refresh() {
+                startDisplay.textContent = formatTime(startSlider.value);
+                endDisplay.textContent = formatTime(endSlider.value);
+            }
+
+            startSlider.addEventListener('input', () => {
+                if (Number(startSlider.value) > Number(endSlider.value)) {
+                    endSlider.value = startSlider.value;
+                }
+                refresh();
+            });
+            endSlider.addEventListener('input', () => {
+                if (Number(endSlider.value) < Number(startSlider.value)) {
+                    startSlider.value = endSlider.value;
+                }
+                refresh();
+            });
+
+            applyDurationToRow(row);
+            refresh();
+        }
+
+        // Set slider bounds from the loaded audio duration
+        function applyDurationToRow(row) {
+            const startSlider = row.querySelector('.start-time');
+            const endSlider = row.querySelector('.end-time');
+            const hint = row.querySelector('.start-end-track');
+
+            if (audioDuration > 0) {
+                const max = Math.ceil(audioDuration);
+                startSlider.max = max;
+                endSlider.max = max;
+                // Default end to full duration if it's still at the placeholder value
+                if (Number(endSlider.value) === 30 || Number(endSlider.value) > max) {
+                    endSlider.value = max;
+                }
+                if (Number(startSlider.value) > max) startSlider.value = 0;
+                if (hint) hint.textContent = `Audio length: ${formatTime(audioDuration)}`;
+                row.querySelector('.start-display').textContent = formatTime(startSlider.value);
+                row.querySelector('.end-display').textContent = formatTime(endSlider.value);
+            }
+        }
+
+        // Read audio duration in-browser when an audio file is picked
+        function handleAudioFile(file) {
+            const nameSpan = document.getElementById('audioFileName');
+            const durSpan = document.getElementById('audioDuration');
+            nameSpan.textContent = file ? file.name : '';
+            if (!file) { durSpan.classList.remove('show'); return; }
+
+            const url = URL.createObjectURL(file);
+            const probe = new Audio();
+            probe.preload = 'metadata';
+            probe.src = url;
+            probe.addEventListener('loadedmetadata', () => {
+                audioDuration = probe.duration || 0;
+                URL.revokeObjectURL(url);
+                durSpan.textContent = `⏱ Duration: ${formatTime(audioDuration)}`;
+                durSpan.classList.add('show');
+                document.querySelectorAll('.image-row').forEach(applyDurationToRow);
+            });
+            probe.addEventListener('error', () => {
+                URL.revokeObjectURL(url);
+                durSpan.classList.remove('show');
+            });
+        }
+
+        document.getElementById('audioFile').addEventListener('change', (e) => {
+            handleAudioFile(e.target.files[0]);
+        });
+
+        // The row that clipboard paste / drop targets.
+        let activeImageRow = null;
+
+        function setActiveRow(row) {
+            activeImageRow = row;
+            document.querySelectorAll('.image-row .file-input-label')
+                .forEach(l => l.classList.remove('active'));
+            row.querySelector('.file-input-label').classList.add('active');
+        }
+
+        // Assign an image File to a row: load into the file input + show preview.
+        function setRowImage(row, file) {
+            if (!file || !file.type.startsWith('image/')) return;
+            const fileInput = row.querySelector('.image-file');
+            const nameSpan = row.querySelector('.image-file-name');
+            const preview = row.querySelector('.image-preview');
+
+            // Put the file into the <input type=file> so the form submits it.
+            try {
+                const dt = new DataTransfer();
+                dt.items.add(file);
+                fileInput.files = dt.files;
+            } catch (err) {
+                // DataTransfer unsupported (very old browser) - preview still works.
+            }
+
+            nameSpan.textContent = file.name;
+
+            // Show thumbnail, revoking any previous object URL.
+            if (preview.dataset.url) URL.revokeObjectURL(preview.dataset.url);
+            const url = URL.createObjectURL(file);
+            preview.dataset.url = url;
+            preview.src = url;
+            preview.style.display = 'block';
+        }
+
+        // Setup file input for a row
+        function setupRowFileInput(row) {
+            const fileInput = row.querySelector('.image-file');
+            const label = row.querySelector('.file-input-label');
+
+            label.addEventListener('click', () => {
+                setActiveRow(row);
+                fileInput.click();
+            });
+
+            fileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) setRowImage(row, file);
+            });
+
+            // Drag and drop
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                label.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                });
+            });
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                label.addEventListener(eventName, () => label.classList.add('dragging'));
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                label.addEventListener(eventName, () => label.classList.remove('dragging'));
+            });
+
+            label.addEventListener('drop', (e) => {
+                setActiveRow(row);
+                const file = e.dataTransfer.files[0];
+                if (file) setRowImage(row, file);
+            });
+        }
+
+        // Paste an image from the clipboard into the active row.
+        document.addEventListener('paste', (e) => {
+            const items = e.clipboardData && e.clipboardData.items;
+            if (!items) return;
+            for (const item of items) {
+                if (item.type && item.type.startsWith('image/')) {
+                    const blob = item.getAsFile();
+                    if (!blob) continue;
+                    const ext = (blob.type.split('/')[1] || 'png').split('+')[0];
+                    const file = new File([blob], `pasted_${Date.now()}.${ext}`, { type: blob.type });
+                    const row = activeImageRow || document.querySelector('.image-row');
+                    if (row) {
+                        setActiveRow(row);
+                        setRowImage(row, file);
+                        showAlert('Image pasted from clipboard', 'info');
+                    }
+                    e.preventDefault();
+                    break;
+                }
+            }
+        });
+        
+        // Add new image row
+        function addImageRow() {
+            imageRowCount++;
+            const imageRows = document.getElementById('imageRows');
+            const newRow = document.createElement('div');
+            newRow.className = 'image-row';
+            newRow.dataset.rowId = imageRowCount;
+            newRow.innerHTML = `
+                <div style="display: grid; grid-template-columns: 2fr 3fr 40px; gap: 12px; align-items: start;">
+                    <div>
+                        <label style="font-size: 12px; margin-bottom: 4px;">Image File</label>
+                        <div class="file-input-label" style="padding: 8px; cursor: pointer; text-align: center;">
+                            <input type="file" class="image-file" accept="image/*" required style="display: none;">
+                            <img class="image-preview" alt="preview">
+                            <span class="image-file-name">📁 Choose image</span>
+                            <span class="paste-hint">or paste ⌘V / Ctrl+V</span>
+                        </div>
+                    </div>
+                    <div class="time-selector">
+                        <div class="time-field">
+                            <div class="time-label-row">
+                                <span>Start</span>
+                                <span class="time-display start-display">0:00</span>
+                            </div>
+                            <input type="range" class="start-time time-slider" min="0" max="300" value="0" step="1">
+                        </div>
+                        <div class="time-field">
+                            <div class="time-label-row">
+                                <span>End</span>
+                                <span class="time-display end-display">0:30</span>
+                            </div>
+                            <input type="range" class="end-time time-slider" min="0" max="300" value="30" step="1">
+                        </div>
+                        <div class="start-end-track">Upload audio to set the time range</div>
+                    </div>
+                    <button type="button" class="btn-remove" onclick="removeImageRow(this)">✕</button>
+                </div>
+            `;
+            imageRows.appendChild(newRow);
+            setupRowFileInput(newRow);
+            setupRowTime(newRow);
+            setActiveRow(newRow);
+            updateRemoveButtons();
+        }
+        
+        // Remove image row
+        function removeImageRow(btn) {
+            const row = btn.closest('.image-row');
+            const wasActive = row === activeImageRow;
+            row.remove();
+            if (wasActive) {
+                const rows = document.querySelectorAll('.image-row');
+                if (rows.length) setActiveRow(rows[rows.length - 1]);
+            }
+            updateRemoveButtons();
+        }
+        
+        // Show/hide remove buttons (always show if more than 1 row)
+        function updateRemoveButtons() {
+            const rows = document.querySelectorAll('.image-row');
+            rows.forEach((row, idx) => {
+                const removeBtn = row.querySelector('.btn-remove');
+                removeBtn.style.display = rows.length > 1 ? 'block' : 'none';
+            });
+        }
+        
+        // Setup initial row
+        document.addEventListener('DOMContentLoaded', function() {
+            const initialRow = document.querySelector('.image-row');
+            setupRowFileInput(initialRow);
+            setupRowTime(initialRow);
+            setActiveRow(initialRow);
+            imageRowCount = 0;
+        });
+        
+        // Form submission
+        document.getElementById('uploadForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const audioFile = document.getElementById('audioFile').files[0];
+            const imageRows = document.querySelectorAll('.image-row');
+            
+            if (!audioFile) {
+                showAlert('Please upload an audio file', 'error');
+                return;
+            }
+            
+            if (imageRows.length === 0) {
+                showAlert('Please add at least one image', 'error');
+                return;
+            }
+            
+            // Validate all rows
+            for (const row of imageRows) {
+                const imageFile = row.querySelector('.image-file').files[0];
+                const startTime = row.querySelector('.start-time').value;
+                const endTime = row.querySelector('.end-time').value;
+                
+                if (!imageFile || startTime === '' || endTime === '') {
+                    showAlert('All image rows must have file and time range', 'error');
+                    return;
+                }
+                if (Number(endTime) <= Number(startTime)) {
+                    showAlert('End time must be after start time', 'error');
+                    return;
+                }
+            }
+            
+            const formData = new FormData();
+            formData.append('audioFile', audioFile);
+            
+            // Add each image row
+            imageRows.forEach((row, idx) => {
+                const imageFile = row.querySelector('.image-file').files[0];
+                const startTime = row.querySelector('.start-time').value;
+                const endTime = row.querySelector('.end-time').value;
+                
+                formData.append(`images`, imageFile);
+                formData.append(`startTimes`, startTime);
+                formData.append(`endTimes`, endTime);
+            });
+            
+            document.getElementById('result').classList.remove('show');
+            document.getElementById('submitBtn').disabled = true;
+            document.getElementById('loading').classList.add('show');
+            
+            try {
+                const response = await fetch('/api/create-video', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Error processing video');
+                }
+                
+                const data = await response.json();
+                showAlert('✓ Video created successfully!', 'success');
+
+                // Show the download button. The file is deleted server-side after
+                // it is downloaded, so this link works once.
+                const link = document.getElementById('downloadLink');
+                link.href = `/download/${encodeURIComponent(data.filename)}`;
+                link.setAttribute('download', data.filename);
+                document.getElementById('result').classList.add('show');
+
+                link.onclick = () => {
+                    // After the download starts, the file is removed from the server.
+                    setTimeout(() => {
+                        link.classList.add('btn-secondary');
+                        link.style.pointerEvents = 'none';
+                        link.style.opacity = '0.6';
+                        link.textContent = '✓ Downloaded';
+                        showAlert('File downloaded and removed from the server.', 'info');
+                    }, 1000);
+                };
+            } catch (error) {
+                showAlert(`✗ ${error.message}`, 'error');
+            } finally {
+                document.getElementById('submitBtn').disabled = false;
+                document.getElementById('loading').classList.remove('show');
+            }
+        });
+        
+        function showAlert(message, type) {
+            const alert = document.getElementById('alert');
+            alert.textContent = message;
+            alert.className = `alert alert-${type} show`;
+            setTimeout(() => alert.classList.remove('show'), 5000);
+        }
+        
+        function resetForm() {
+            document.getElementById('uploadForm').reset();
+            
+            // Reset all image rows to just show the first one
+            const imageRows = document.getElementById('imageRows');
+            const rows = imageRows.querySelectorAll('.image-row');
+            rows.forEach((row, idx) => {
+                if (idx > 0) row.remove();
+            });
+            
+            // Hide and restore the download button
+            const result = document.getElementById('result');
+            result.classList.remove('show');
+            const link = document.getElementById('downloadLink');
+            link.classList.remove('btn-secondary');
+            link.style.pointerEvents = '';
+            link.style.opacity = '';
+            link.textContent = '⬇ Download Video';
+            link.onclick = null;
+
+            // Reset audio duration state
+            audioDuration = 0;
+            document.getElementById('audioFileName').textContent = '';
+            document.getElementById('audioDuration').classList.remove('show');
+
+            // Reset first row
+            const firstRow = imageRows.querySelector('.image-row');
+            if (firstRow) {
+                firstRow.querySelector('.image-file-name').textContent = '📁 Choose image';
+                const preview = firstRow.querySelector('.image-preview');
+                if (preview.dataset.url) URL.revokeObjectURL(preview.dataset.url);
+                preview.removeAttribute('src');
+                preview.dataset.url = '';
+                preview.style.display = 'none';
+                setActiveRow(firstRow);
+                const startSlider = firstRow.querySelector('.start-time');
+                const endSlider = firstRow.querySelector('.end-time');
+                startSlider.max = 300;
+                endSlider.max = 300;
+                startSlider.value = 0;
+                endSlider.value = 30;
+                firstRow.querySelector('.start-display').textContent = formatTime(0);
+                firstRow.querySelector('.end-display').textContent = formatTime(30);
+                firstRow.querySelector('.start-end-track').textContent = 'Upload audio to set the time range';
+            }
+
+            document.getElementById('alert').classList.remove('show');
+            imageRowCount = 0;
+        }
+    </script>
+</body>
+</html>
