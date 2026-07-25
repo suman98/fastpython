@@ -1,0 +1,11 @@
+venv/
+.venv/
+__pycache__/
+**/__pycache__/
+*.pyc
+outputs/
+uploads/
+.playground/
+.serena/
+*.md
+.DS_Store

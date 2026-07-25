@@ -10,10 +10,14 @@ from moviepy import AudioFileClip, ImageClip, ColorClip, CompositeVideoClip
 from scripts.video_with_image import parse_time
 
 # Directories for uploads and outputs.
-UPLOAD_DIR = Path("uploads")
-OUTPUT_DIR = Path("outputs")
-UPLOAD_DIR.mkdir(exist_ok=True)
-OUTPUT_DIR.mkdir(exist_ok=True)
+# On serverless hosts (Vercel) only /tmp is writable, so the base dir is
+# configurable via DATA_DIR and defaults to /tmp when running on Vercel.
+_DEFAULT_BASE = "/tmp" if os.environ.get("VERCEL") else "."
+BASE_DIR = Path(os.environ.get("DATA_DIR", _DEFAULT_BASE))
+UPLOAD_DIR = BASE_DIR / "uploads"
+OUTPUT_DIR = BASE_DIR / "outputs"
+UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 
 def create_video_with_multiple_images(audio_path, image_specs, output_path=None, frame_size=(1280, 720), fps=24, bg_color=(0, 0, 0)):

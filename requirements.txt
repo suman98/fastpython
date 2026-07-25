@@ -2,3 +2,5 @@ fastapi
 uvicorn
 moviepy
 python-multipart
+jinja2
+imageio-ffmpeg
